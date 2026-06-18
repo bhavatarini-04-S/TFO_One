@@ -2,10 +2,7 @@ const CACHE_NAME = 'tfo-one-v1';
 const ASSETS = [
   '/',
   '/index.html',
-  '/src/main.jsx',
-  '/src/App.jsx',
-  '/src/App.css',
-  '/src/index.css',
+  '/manifest.json',
   '/favicon.svg'
 ];
 
@@ -20,7 +17,16 @@ self.addEventListener('install', (e) => {
 self.addEventListener('fetch', (e) => {
   e.respondWith(
     caches.match(e.request).then((cachedResponse) => {
-      return cachedResponse || fetch(e.request);
+      if (cachedResponse) {
+        return cachedResponse;
+      }
+      return fetch(e.request).catch(() => {
+        // Network request failed, return a 503 error response
+        return new Response('Network request failed', {
+          status: 503,
+          statusText: 'Service Unavailable'
+        });
+      });
     })
   );
 });
